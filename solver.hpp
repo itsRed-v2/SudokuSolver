@@ -3,6 +3,7 @@
 
 #include <array>
 #include <vector>
+#include <chrono>
 
 using namespace std;
 
@@ -46,9 +47,9 @@ private:
 public:
     StateGrid(char sudokuGrid[9][9]); // Standard constructor
     StateGrid(StateGrid &other); // Copy constructor
-    void draw() const;
     bool isSolved() const;
     bool isImpossible() const;
+    char valueAt(int x, int y) const;
 
     void collapseOnce();
     void collapseFully();
@@ -57,10 +58,16 @@ public:
     friend bool operator==(const StateGrid &lhs, const StateGrid &rhs);
 };
 
+struct SudokuResult {
+    StateGrid grid;
+    bool isSolved;
+    int64_t calculationTimeMicrosec;
+};
+
 class SudokuSolver {
 public:
     SudokuSolver() = default;
-    void solve(char grid[9][9]);
+    SudokuResult solve(char grid[9][9]);
 
 private:
     void solveRecursive(StateGrid &states);

@@ -4,6 +4,23 @@
 
 using namespace std;
 
+void draw(const StateGrid &grid) {
+    for (int y = 0; y < 9; y++) {
+        for (int x = 0; x < 9; x++) {
+            int cellValue = grid.valueAt(x, y);
+            char cellChar = cellValue == 0 ? '.' : cellValue + '0';
+            cout << cellChar << " ";
+            if (x == 2 || x == 5) {
+                cout << "│ ";
+            }
+        }
+        cout << endl;
+        if (y == 2 || y == 5) {
+            cout << "──────┼───────┼──────" << endl;
+        }
+    }
+}
+
 int main() {
     char grid[9][9] = {
         {7,3,5,0,0,0,1,9,6},
@@ -43,12 +60,10 @@ int main() {
 
     SudokuSolver solver;
 
-    cout << "Solving easy grid:" << endl;
-    solver.solve(grid);
+    cout << "Solving grid:" << endl;
+    SudokuResult result { solver.solve(grid) };
 
-    cout << "Solving blonde platine:" << endl;
-    solver.solve(blondePlatine);
-
-    cout << "Solving impossible grid:" << endl;
-    solver.solve(impossible);
+    draw(result.grid);
+    cout << (result.isSolved ? "The sudoku is solved." : "Could not solve the sudoku.") << endl;
+    cout << "Solving took " << (result.calculationTimeMicrosec / 1000.0) << " milliseconds." << endl;
 }

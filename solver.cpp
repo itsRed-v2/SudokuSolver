@@ -1,7 +1,5 @@
-#include <iostream>
-#include <string>
+#include <stdexcept>
 #include <algorithm>
-#include <iostream>
 
 #include "solver.hpp"
 
@@ -160,23 +158,6 @@ void StateGrid::initializeGroups() {
     }
 }
 
-void StateGrid::draw() const {
-    for (int y = 0; y < 9; y++) {
-        for (int x = 0; x < 9; x++) {
-            int cellValue = m_grid[y][x].getValue();
-            char cellChar = cellValue == 0 ? '.' : cellValue + '0';
-            cout << cellChar << " ";
-            if (x == 2 || x == 5) {
-                cout << "│ ";
-            }
-        }
-        cout << endl;
-        if (y == 2 || y == 5) {
-            cout << "──────┼───────┼──────" << endl;
-        }
-    }
-}
-
 bool StateGrid::isSolved() const {
     for (int y = 0; y < 9; y++) {
         for (int x = 0; x < 9; x++) {
@@ -197,6 +178,10 @@ bool StateGrid::isImpossible() const {
         }
     }
     return false;
+}
+
+char StateGrid::valueAt(int x, int y) const {
+    return m_grid[y][x].getValue();
 }
 
 void StateGrid::collapseOnce() {
@@ -249,13 +234,24 @@ bool operator==(const StateGrid &lhs, const StateGrid &rhs) {
     return true;
 }
 
-// functions
+// class SudokuSolver
 
-void SudokuSolver::solve(char grid[9][9]) {
+SudokuResult SudokuSolver::solve(char grid[9][9]) {
+    using namespace std::chrono;
+
+    auto start = high_resolution_clock::now();
+
     StateGrid states (grid);
     solveRecursive(states);
 
-    states.draw();
+    auto stop = high_resolution_clock::now();
+    auto duration = duration_cast<microseconds>(stop - start);
+
+    return {
+        states,
+        states.isSolved(),
+        duration.count()
+    };
 }
 
 void SudokuSolver::solveRecursive(StateGrid &states) {
