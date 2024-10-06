@@ -1,5 +1,5 @@
-solver: solver.c
-	gcc -o solver solver.c
+main: main.cpp solver.cpp solver.hpp
+	g++ -o main main.cpp solver.cpp
 
-run: solver
-	./solver
+run: main
+	./main
