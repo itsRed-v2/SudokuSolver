@@ -2,12 +2,8 @@
 #include <string>
 #include <algorithm>
 #include <iostream>
-#include <chrono>
-#include <thread>
 
 #include "solver.hpp"
-
-#define sleep(ms) std::this_thread::sleep_for(std::chrono::milliseconds(ms))
 
 // class CellState
 
@@ -24,6 +20,7 @@ void CellState::collapseTo(char state) {
 }
 
 bool CellState::hasState(char state) const {
+    if (state < 1 || state > 9) throw runtime_error("Illegal state value");
     return m_states[state - 1] != 0;
 }
 
@@ -61,6 +58,10 @@ bool operator!=(const CellState &lhs, const CellState &rhs) {
 
 // class CellGroup
 
+CellGroup::CellGroup(array<CellState*, 9> cells) : m_cells(cells) {
+
+}
+
 void CellGroup::collapse() {
     collapseByCollision();
     collapseByUniqueness();
@@ -72,7 +73,7 @@ void CellGroup::collapseByCollision() {
         if (index != -1) {
             for (int i = 0; i < 9; i++) {
                 if (i != index) {
-                    cells[i]->removeState(s);
+                    m_cells[i]->removeState(s);
                 }
             }
         }
@@ -84,13 +85,13 @@ void CellGroup::collapseByUniqueness() {
         auto predicate { [s](CellState* cell) -> bool { return cell->hasState(s); }};
 
         int candidateCount { static_cast<int>(count_if(
-            cells.begin(), 
-            cells.end(), 
+            m_cells.begin(), 
+            m_cells.end(), 
             predicate
         )) };
         
         if (candidateCount == 1) {
-            CellState** candidatePtr { find_if(cells.begin(), cells.end(), predicate) };
+            CellState** candidatePtr { find_if(m_cells.begin(), m_cells.end(), predicate) };
             (**candidatePtr).collapseTo(s);
         }
     }
@@ -98,7 +99,7 @@ void CellGroup::collapseByUniqueness() {
 
 int CellGroup::getIndexOfCellWithNumber(char number) const {
     for (int i = 0; i < 9; i++) {
-        if (cells[i]->getValue() == number) {
+        if (m_cells[i]->getValue() == number) {
             return i;
         }
     }
@@ -130,33 +131,31 @@ StateGrid::StateGrid(StateGrid &other) {
 }
 
 void StateGrid::initializeGroups() {
-    int groupIndex = 0;
-
     for (int row = 0; row < 9; row++) {
-        CellGroup group;
+        array<CellState*, 9> cells;
         for (int x = 0; x < 9; x++) {
-            group.cells[x] = &m_grid[row][x];
+            cells[x] = &m_grid[row][x];
         }
-        m_groups[groupIndex++] = group;
+        m_groups.push_back(CellGroup{cells});
     }
 
     for (int col = 0; col < 9; col++) {
-        CellGroup group;
+        array<CellState*, 9> cells;
         for (int y = 0; y < 9; y++) {
-            group.cells[y] = &m_grid[y][col];
+            cells[y] = &m_grid[y][col];
         }
-        m_groups[groupIndex++] = group;
+        m_groups.push_back(CellGroup{cells});
     }
 
     for (int squareY = 0; squareY < 3; squareY++) {
         for (int squareX = 0; squareX < 3; squareX++) {
-            CellGroup group;
+            array<CellState*, 9> cells;
             for (int i = 0; i < 9; i++) {
                 int y = squareY * 3 + i / 3;
                 int x = squareX * 3 + i % 3;
-                group.cells[i] = &m_grid[y][x];
+                cells[i] = &m_grid[y][x];
             }
-            m_groups[groupIndex++] = group;
+            m_groups.push_back(CellGroup{cells});
         }
     }
 }
@@ -190,7 +189,7 @@ bool StateGrid::isSolved() const {
 }
 
 bool StateGrid::isImpossible() const {
-        for (int y = 0; y < 9; y++) {
+    for (int y = 0; y < 9; y++) {
         for (int x = 0; x < 9; x++) {
             if (m_grid[y][x].countStates() == 0) {
                 return true;
@@ -254,14 +253,8 @@ bool operator==(const StateGrid &lhs, const StateGrid &rhs) {
 
 void SudokuSolver::solve(char grid[9][9]) {
     StateGrid states (grid);
-    
-    cout << "Grid:" << endl;
-    states.draw();
-    sleep(1000);
-
     solveRecursive(states);
 
-    cout << "Final grid states:" << endl;
     states.draw();
 }
 

@@ -1,2 +1,6 @@
+# VS Code things
+.vscode/
+
+# generated executables
 solver
 main

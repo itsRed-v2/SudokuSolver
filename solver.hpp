@@ -2,6 +2,7 @@
 #define SOLVER_HPP
 
 #include <array>
+#include <vector>
 
 using namespace std;
 
@@ -21,16 +22,16 @@ public:
 };
 
 class CellGroup {
-public:
-    array<CellState*, 9> cells;
-
-    CellGroup() = default;
-    void collapse();
-
 private:
+    array<CellState*, 9> m_cells;
+
     void collapseByCollision();
     void collapseByUniqueness();
     int getIndexOfCellWithNumber(char number) const;
+
+public:
+    CellGroup(array<CellState*, 9> cells);
+    void collapse();
 };
 
 class StateGrid {
@@ -38,7 +39,7 @@ private:
     CellState m_grid[9][9];
     // A "group" represents a line, column or square of the sudoku grid.
     // Each group consists in pointers to the states of the 9 cells it contains.
-    array<CellGroup, 27> m_groups;
+    vector<CellGroup> m_groups;
 
     void initializeGroups();
 
@@ -51,7 +52,7 @@ public:
 
     void collapseOnce();
     void collapseFully();
-    CellState& getFewestStateCell() ;
+    CellState& getFewestStateCell();
 
     friend bool operator==(const StateGrid &lhs, const StateGrid &rhs);
 };
