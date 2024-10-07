@@ -58,10 +58,22 @@ int main() {
         {4,7,5,0,0,6,0,0,0}
     };
 
+    char volodia[9][9] = {
+        {0,3,0,6,0,2,9,0,0},
+        {0,2,0,5,0,9,0,0,0},
+        {0,4,9,0,3,0,2,0,0},
+        {0,9,0,0,0,7,0,3,2},
+        {2,1,8,0,0,0,0,0,0},
+        {0,0,0,2,0,0,0,9,6},
+        {0,0,2,0,1,5,0,0,8},
+        {1,0,0,0,0,0,4,2,0},
+        {0,7,0,0,2,0,0,6,0}
+    };
+
     SudokuSolver solver;
 
     cout << "Solving grid:" << endl;
-    SudokuResult result { solver.solve(grid) };
+    SudokuResult result { solver.solve(volodia) };
 
     draw(result.grid);
     cout << (result.isSolved ? "The sudoku is solved." : "Could not solve the sudoku.") << endl;
