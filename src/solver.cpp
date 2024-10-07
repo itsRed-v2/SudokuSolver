@@ -106,11 +106,11 @@ int CellGroup::getIndexOfCellWithNumber(char number) const {
 
 // class StateGrid
 
-StateGrid::StateGrid(char sudokuGrid[9][9]) {
+StateGrid::StateGrid(const Sudoku &sudoku) {
     for (int y = 0; y < 9; y++) {
         for (int x = 0; x < 9; x++) {
-            if (sudokuGrid[y][x] != 0) {
-                m_grid[y][x].collapseTo(sudokuGrid[y][x]);
+            if (sudoku.grid[y][x] != 0) {
+                m_grid[y][x].collapseTo(sudoku.grid[y][x]);
             }
         }
     }
@@ -184,6 +184,16 @@ char StateGrid::valueAt(int x, int y) const {
     return m_grid[y][x].getValue();
 }
 
+Sudoku StateGrid::toSudoku() const {
+    Sudoku sudoku;
+    for (int y = 0; y < 9; y++) {
+        for (int x = 0; x < 9; x++) {
+            sudoku.grid[y][x] = valueAt(x, y);
+        }
+    }
+    return sudoku;
+}
+
 void StateGrid::collapseOnce() {
     for (CellGroup &group : m_groups) {
         group.collapse();
@@ -236,7 +246,7 @@ bool operator==(const StateGrid &lhs, const StateGrid &rhs) {
 
 // class SudokuSolver
 
-SudokuResult SudokuSolver::solve(char grid[9][9]) {
+SudokuResult SudokuSolver::solve(const Sudoku &grid) {
     using namespace std::chrono;
 
     auto start = high_resolution_clock::now();
@@ -248,7 +258,7 @@ SudokuResult SudokuSolver::solve(char grid[9][9]) {
     auto duration = duration_cast<microseconds>(stop - start);
 
     return {
-        states,
+        states.toSudoku(),
         states.isSolved(),
         duration.count()
     };

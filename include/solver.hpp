@@ -5,6 +5,8 @@
 #include <vector>
 #include <chrono>
 
+#include "sudoku.hpp"
+
 using namespace std;
 
 class CellState {
@@ -45,11 +47,12 @@ private:
     void initializeGroups();
 
 public:
-    StateGrid(char sudokuGrid[9][9]); // Standard constructor
+    StateGrid(const Sudoku &grid); // Standard constructor
     StateGrid(StateGrid &other); // Copy constructor
     bool isSolved() const;
     bool isImpossible() const;
     char valueAt(int x, int y) const;
+    Sudoku toSudoku() const;
 
     void collapseOnce();
     void collapseFully();
@@ -59,7 +62,7 @@ public:
 };
 
 struct SudokuResult {
-    StateGrid grid;
+    Sudoku sudoku;
     bool isSolved;
     int64_t calculationTimeMicrosec;
 };
@@ -67,7 +70,7 @@ struct SudokuResult {
 class SudokuSolver {
 public:
     SudokuSolver() = default;
-    SudokuResult solve(char grid[9][9]);
+    SudokuResult solve(const Sudoku &grid);
 
 private:
     void solveRecursive(StateGrid &states);
