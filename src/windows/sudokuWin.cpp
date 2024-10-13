@@ -65,7 +65,7 @@ void SudokuWin::updateHighlightedCell() {
     
     if (prevCell >= 0 && prevCell < 81)
         mvwchgat(m_win, yScreenPosOfCell(getY(prevCell)), xScreenPosOfCell(getX(prevCell)), 1, A_NORMAL, 0, NULL);
-    if (m_curCell >= 0 && m_curCell < 81)
+    if (m_showCurCell && m_curCell >= 0 && m_curCell < 81)
         mvwchgat(m_win, yScreenPosOfCell(getY(m_curCell)), xScreenPosOfCell(getX(m_curCell)), 1, A_STANDOUT, 0, NULL);
     
     prevCell = m_curCell;
@@ -86,15 +86,14 @@ void SudokuWin::drawSudoku() {
 
 void SudokuWin::focus() {
     mvwchgat(m_win, 0, 2, 6, A_BOLD, 1, NULL);
-    m_curCell = m_curCellSave;
+    m_showCurCell = true;
     updateHighlightedCell();
     wrefresh(m_win);
 }
 
 void SudokuWin::blur() {
     mvwchgat(m_win, 0, 2, 6, A_NORMAL, 0, NULL);
-    m_curCellSave = m_curCell;
-    m_curCell = -1;
+    m_showCurCell = false;
     updateHighlightedCell();
     wrefresh(m_win);
 }

@@ -3,26 +3,17 @@
 
 #include "windows/buttonsWin.hpp"
 
-struct Button {
-    string id;
-    string text;
-    int y;
-    int x;
-    int colorPair;
-    void(*callback)();
-};
-
-array<Button, 2> buttons = {
-    Button{ "solve", "Solve !", 1, 3, 2 },
-    Button{ "clear", "Clear", 1, 13, 3 }
-};
-
 void ButtonsWin::init() {
     m_win = newwin(3, 21, 0, 25);
     box(m_win, 0, 0);
     mvwprintw(m_win, 0, 2, "Menu");
 
-    for (const Button &bt : buttons) {
+    m_buttons = {
+        Button{ "solve", "Solve !", 1, 3, 2 },
+        Button{ "clear", "Clear", 1, 13, 3 }
+    };
+
+    for (const Button &bt : m_buttons) {
         wattron(m_win, COLOR_PAIR(bt.colorPair));
         mvwaddstr(m_win, bt.y, bt.x, bt.text.c_str());
     }
@@ -37,8 +28,8 @@ void ButtonsWin::onKey(int code) {
     } else if (code == KEY_RIGHT && m_selectedButton < 1) {
         m_selectedButton++;
     } else if (code == '\n') {
-        if (buttons[m_selectedButton].callback) {
-            buttons[m_selectedButton].callback();
+        if (m_buttons[m_selectedButton].callback) {
+            m_buttons[m_selectedButton].callback();
         }
     }
 
@@ -49,11 +40,11 @@ void ButtonsWin::onKey(int code) {
 void ButtonsWin::updateHighlightedButton() {
     static int prevSelectedButton { -1 };
     if (prevSelectedButton != -1) {
-        const Button &bt { buttons[prevSelectedButton] };
+        const Button &bt { m_buttons[prevSelectedButton] };
         mvwchgat(m_win, bt.y, bt.x, bt.text.length(), A_NORMAL, bt.colorPair, NULL);
     }
     if (m_selectedButton != -1) {
-        const Button &bt { buttons[m_selectedButton] };
+        const Button &bt { m_buttons[m_selectedButton] };
         mvwchgat(m_win, bt.y, bt.x, bt.text.length(), A_STANDOUT, bt.colorPair, NULL);
     }
     prevSelectedButton = m_selectedButton;
@@ -74,7 +65,7 @@ void ButtonsWin::blur() {
 }
 
 void ButtonsWin::setButtonCallback(const string &buttonId, void(*cb)()) {
-    for (Button &bt : buttons) {
+    for (Button &bt : m_buttons) {
         if (bt.id == buttonId) {
             bt.callback = cb;
             return;

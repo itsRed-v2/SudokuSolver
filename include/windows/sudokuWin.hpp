@@ -2,13 +2,16 @@
 #define SUDOKU_WIN_HPP
 
 #include <ncurses.h>
+
+#include "windows/interactiveWin.hpp"
+
 #include "sudoku.hpp"
 
-class SudokuWin {
+class SudokuWin: public InteractiveWin {
 private:
     WINDOW *m_win;
     int m_curCell { 0 };
-    int m_curCellSave { 0 };
+    bool m_showCurCell { true };
     Sudoku displayedSudoku;
 
 private:
@@ -17,10 +20,10 @@ private:
     void drawSudoku();
 
 public:
-    explicit SudokuWin() = default;
     void init(const Sudoku &sudoku);
     void onArrowPress(int code);
     void selectNextCell();
+
     void onKey(int code); 
     void focus();
     void blur();

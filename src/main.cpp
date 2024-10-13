@@ -5,12 +5,14 @@
 #include "windows/buttonsWin.hpp"
 
 #include <iostream>
+#include <array>
 #include <ncurses.h>
 
 using namespace std;
 
 SudokuWin sudokuWin;
 ButtonsWin buttonsWin;
+array<InteractiveWin*, 2> windows { &sudokuWin, &buttonsWin };
 int focusedWin { 0 };
 SudokuSolver solver;
 
@@ -42,7 +44,6 @@ int run() {
     init_pair(1, COLOR_BLUE, COLOR_BLACK);
     init_pair(2, COLOR_GREEN, COLOR_BLACK);
     init_pair(3, COLOR_RED, COLOR_BLACK);
-    standend();
     
     refresh(); // Refresh stdscr (seems necessary for proper initialization of windows)
 
@@ -67,21 +68,11 @@ void applicationLoop() {
 
     while ((ch = getch()) != 4) { // 4 is CTRL_D
         if (ch == '\t') {
-            if (focusedWin == 0) {
-                sudokuWin.blur();
-                buttonsWin.focus();
-                focusedWin = 1;
-            } else {
-                sudokuWin.focus();
-                buttonsWin.blur();
-                focusedWin = 0;
-            }
+            windows[focusedWin]->blur();
+            focusedWin = (focusedWin + 1) % windows.size();
+            windows[focusedWin]->focus();
         } else {
-            if (focusedWin == 0) {
-                sudokuWin.onKey(ch);
-            } else {
-                buttonsWin.onKey(ch);
-            }
+            windows[focusedWin]->onKey(ch);
         }
 
         move(13, 0);
