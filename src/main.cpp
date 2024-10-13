@@ -3,6 +3,7 @@
 #include "grids.hpp"
 #include "windows/sudokuWin.hpp"
 #include "windows/buttonsWin.hpp"
+#include "colors.hpp"
 
 #include <iostream>
 #include <array>
@@ -39,12 +40,7 @@ int run() {
     noecho();
     keypad(stdscr, TRUE);
     curs_set(0); // Make the cursor invisible
-
-    start_color();
-    init_pair(1, COLOR_BLUE, COLOR_BLACK);
-    init_pair(2, COLOR_GREEN, COLOR_BLACK);
-    init_pair(3, COLOR_RED, COLOR_BLACK);
-    
+    initNcursesColors();
     refresh(); // Refresh stdscr (seems necessary for proper initialization of windows)
 
     // Initialisation of gui

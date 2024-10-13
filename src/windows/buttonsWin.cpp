@@ -1,5 +1,6 @@
 #include <array>
 #include <stdexcept>
+#include "colors.hpp"
 
 #include "windows/buttonsWin.hpp"
 
@@ -9,8 +10,8 @@ void ButtonsWin::init() {
     mvwprintw(m_win, 0, 2, "Menu");
 
     m_buttons = {
-        Button{ "solve", "Solve !", 1, 3, 2 },
-        Button{ "clear", "Clear", 1, 13, 3 }
+        Button{ "solve", "Solve !", 1, 3, CP_GREEN, NULL },
+        Button{ "clear", "Clear", 1, 13, CP_RED, NULL }
     };
 
     for (const Button &bt : m_buttons) {
@@ -51,14 +52,14 @@ void ButtonsWin::updateHighlightedButton() {
 }
 
 void ButtonsWin::focus() {
-    mvwchgat(m_win, 0, 2, 4, A_BOLD, 1, NULL);
+    mvwchgat(m_win, 0, 2, 4, A_BOLD, CP_BLUE, NULL);
     m_selectedButton = 0;
     updateHighlightedButton();
     wrefresh(m_win);
 }
 
 void ButtonsWin::blur() {
-    mvwchgat(m_win, 0, 2, 4, A_NORMAL, 0, NULL);
+    mvwchgat(m_win, 0, 2, 4, A_NORMAL, CP_NORMAL, NULL);
     m_selectedButton = -1;
     updateHighlightedButton();
     wrefresh(m_win);
