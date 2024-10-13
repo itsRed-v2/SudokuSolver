@@ -1,82 +1,101 @@
 #include "sudoku.hpp"
 #include "solver.hpp"
+#include "grids.hpp"
+#include "windows/sudokuWin.hpp"
+#include "windows/buttonsWin.hpp"
 
 #include <iostream>
+#include <ncurses.h>
 
 using namespace std;
 
-void draw(const Sudoku &sudoku) {
-    for (int y = 0; y < 9; y++) {
-        for (int x = 0; x < 9; x++) {
-            int cellValue = sudoku.grid[y][x];
-            char cellChar = cellValue == 0 ? '.' : cellValue + '0';
-            cout << cellChar << " ";
-            if (x == 2 || x == 5) {
-                cout << "│ ";
+SudokuWin sudokuWin;
+ButtonsWin buttonsWin;
+int focusedWin { 0 };
+SudokuSolver solver;
+
+int run();
+void applicationLoop();
+void onSolveButtonClick();
+void onClearButtonClick();
+
+int main() {
+    try {
+        return run();
+    } catch(const std::exception& e) {
+        endwin();
+        cerr << "Something went wrong:" << endl;
+        cerr << e.what() << endl;
+    }
+
+    return 1;
+}
+
+int run() {
+    // Initialisation of ncurses
+    initscr();
+    noecho();
+    keypad(stdscr, TRUE);
+    curs_set(0); // Make the cursor invisible
+
+    start_color();
+    init_pair(1, COLOR_BLUE, COLOR_BLACK);
+    init_pair(2, COLOR_GREEN, COLOR_BLACK);
+    init_pair(3, COLOR_RED, COLOR_BLACK);
+    standend();
+    
+    refresh(); // Refresh stdscr (seems necessary for proper initialization of windows)
+
+    // Initialisation of gui
+    sudokuWin.init(volodia);
+    sudokuWin.focus();
+
+    buttonsWin.init();
+    buttonsWin.setButtonCallback("solve", &onSolveButtonClick);
+    buttonsWin.setButtonCallback("clear", &onClearButtonClick);
+
+    applicationLoop();
+
+    // Ending ncurses
+    endwin();
+
+    return 0;
+}
+
+void applicationLoop() {
+    int ch;
+
+    while ((ch = getch()) != 4) { // 4 is CTRL_D
+        if (ch == '\t') {
+            if (focusedWin == 0) {
+                sudokuWin.blur();
+                buttonsWin.focus();
+                focusedWin = 1;
+            } else {
+                sudokuWin.focus();
+                buttonsWin.blur();
+                focusedWin = 0;
+            }
+        } else {
+            if (focusedWin == 0) {
+                sudokuWin.onKey(ch);
+            } else {
+                buttonsWin.onKey(ch);
             }
         }
-        cout << endl;
-        if (y == 2 || y == 5) {
-            cout << "──────┼───────┼──────" << endl;
-        }
+
+        move(13, 0);
+        clrtoeol();
+        printw("You pressed '%c' (code %d)", ch, ch);
+        refresh();
     }
 }
 
-int main() {
-    Sudoku grid { .grid = {
-        {7,3,5,0,0,0,1,9,6},
-        {0,0,9,1,7,5,8,0,2},
-        {0,0,1,0,6,9,7,0,5},
-        {9,2,0,0,5,0,0,7,8},
-        {0,5,0,0,0,0,0,2,0},
-        {3,0,0,0,0,0,5,0,0},
-        {0,0,0,5,0,0,0,1,0},
-        {0,9,4,0,0,0,2,0,0},
-        {0,0,0,6,0,7,0,0,4}
-    }};
+void onSolveButtonClick() {
+    SudokuResult result { solver.solve(sudokuWin.getDisplayedSudoku()) };
+    sudokuWin.setDisplayedSudoku(result.sudoku);
+}
 
-    Sudoku blondePlatine { .grid = {
-        {0,0,0,0,0,0,0,1,2},
-        {0,0,0,0,0,0,0,0,3},
-        {0,0,2,3,0,0,4,0,0},
-        {0,0,1,8,0,0,0,0,5},
-        {0,6,0,0,7,0,8,0,0},
-        {0,0,0,0,0,9,0,0,0},
-        {0,0,8,5,0,0,0,0,0},
-        {9,0,0,0,4,0,5,0,0},
-        {4,7,0,0,0,6,0,0,0}
-    }};
-
-    Sudoku impossible { .grid = {
-        {0,0,6,0,0,0,7,1,2},
-        {0,0,9,0,0,0,0,0,3},
-        {0,0,2,3,0,0,4,0,0},
-        {0,9,1,8,0,0,0,0,5},
-        {0,6,4,0,7,0,8,0,0},
-        {0,0,7,0,0,9,0,0,0},
-        {6,0,8,5,0,0,0,0,0},
-        {9,0,3,0,4,0,5,0,0},
-        {4,7,5,0,0,6,0,0,0}
-    }};
-
-    Sudoku volodia { .grid = {
-        {0,3,0,6,0,2,9,0,0},
-        {0,2,0,5,0,9,0,0,0},
-        {0,4,9,0,3,0,2,0,0},
-        {0,9,0,0,0,7,0,3,2},
-        {2,1,8,0,0,0,0,0,0},
-        {0,0,0,2,0,0,0,9,6},
-        {0,0,2,0,1,5,0,0,8},
-        {1,0,0,0,0,0,4,2,0},
-        {0,7,0,0,2,0,0,6,0}
-    }};
-
-    SudokuSolver solver;
-
-    cout << "Solving grid:" << endl;
-    SudokuResult result { solver.solve(volodia) };
-
-    draw(result.sudoku);
-    cout << (result.isSolved ? "The sudoku is solved." : "Could not solve the sudoku.") << endl;
-    cout << "Solving took " << (result.calculationTimeMicrosec / 1000.0) << " milliseconds." << endl;
+void onClearButtonClick() {
+    sudokuWin.setDisplayedSudoku(Sudoku{});
 }
