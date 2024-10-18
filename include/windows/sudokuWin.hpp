@@ -15,14 +15,16 @@ private:
     Sudoku displayedSudoku;
 
 private:
+    void onArrowPress(int code);
     void updateHighlightedCell();
     void drawBorders();
     void drawSudoku();
 
+    void selectNextCell();
+    void selectPrevCell();
+
 public:
     void init(const Sudoku &sudoku);
-    void onArrowPress(int code);
-    void selectNextCell();
 
     void onKey(int code); 
     void focus();

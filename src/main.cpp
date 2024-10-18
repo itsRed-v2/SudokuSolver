@@ -3,20 +3,24 @@
 #include "grids.hpp"
 #include "windows/sudokuWin.hpp"
 #include "windows/buttonsWin.hpp"
-#include "windows/statsWin.hpp"
+#include "windows/infoWin.hpp"
 #include "colors.hpp"
 
 #include <iostream>
 #include <array>
 #include <ncurses.h>
+#include <chrono>
+#include <thread>
 
 using namespace std;
+
+#define sleep(ms) this_thread::sleep_for(chrono::milliseconds(ms))
 
 SudokuWin sudokuWin;
 ButtonsWin buttonsWin;
 array<InteractiveWin*, 2> windows { &sudokuWin, &buttonsWin };
 int focusedWin { 0 };
-StatsWin statsWin;
+InfoWin infoWin;
 SudokuSolver solver;
 bool shouldExit = false;
 
@@ -56,7 +60,7 @@ int run() {
     buttonsWin.setButtonCallback("clear", &onClearButtonClick);
     buttonsWin.setButtonCallback("exit", &onExitButtonClick);
 
-    statsWin.init();
+    infoWin.init();
 
     applicationLoop();
 
@@ -88,9 +92,16 @@ void applicationLoop() {
 }
 
 void onSolveButtonClick() {
+    infoWin.clear();
+
     SudokuResult result { solver.solve(sudokuWin.getDisplayedSudoku()) };
-    sudokuWin.setDisplayedSudoku(result.sudoku);
-    statsWin.displayStats(result);
+    if (result.isSolved) {
+        sudokuWin.setDisplayedSudoku(result.sudoku);
+        infoWin.displayStats(result);
+    } else {
+        sleep(20);
+        infoWin.sayImpossibleSudoku(result);
+    }
 }
 
 void onClearButtonClick() {

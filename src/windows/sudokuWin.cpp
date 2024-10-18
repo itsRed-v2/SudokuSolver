@@ -51,6 +51,8 @@ void SudokuWin::onKey(int code) {
     } else if (code == KEY_BACKSPACE) {
         displayedSudoku.cells[m_curCell] = 0;
         drawSudoku();
+        selectPrevCell();
+    } else if (code == '\n') {
         selectNextCell();
     }
     wrefresh(m_win);
@@ -59,6 +61,12 @@ void SudokuWin::onKey(int code) {
 void SudokuWin::selectNextCell() {
     m_curCell++;
     if (m_curCell > 80) m_curCell = 80;
+    updateHighlightedCell();
+}
+
+void SudokuWin::selectPrevCell() {
+    m_curCell--;
+    if (m_curCell < 0) m_curCell = 0;
     updateHighlightedCell();
 }
 
