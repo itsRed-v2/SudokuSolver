@@ -24,7 +24,7 @@ class ButtonsWin: public InteractiveWin {
 private:
     WINDOW *m_win;
     int m_selectedButton { 0 };
-    array<Button, 2> m_buttons;
+    array<Button, 3> m_buttons;
 
 private:
     void updateHighlightedButton();

@@ -3,6 +3,7 @@
 #include "grids.hpp"
 #include "windows/sudokuWin.hpp"
 #include "windows/buttonsWin.hpp"
+#include "windows/statsWin.hpp"
 #include "colors.hpp"
 
 #include <iostream>
@@ -15,12 +16,15 @@ SudokuWin sudokuWin;
 ButtonsWin buttonsWin;
 array<InteractiveWin*, 2> windows { &sudokuWin, &buttonsWin };
 int focusedWin { 0 };
+StatsWin statsWin;
 SudokuSolver solver;
+bool shouldExit = false;
 
 int run();
 void applicationLoop();
 void onSolveButtonClick();
 void onClearButtonClick();
+void onExitButtonClick();
 
 int main() {
     try {
@@ -44,12 +48,15 @@ int run() {
     refresh(); // Refresh stdscr (seems necessary for proper initialization of windows)
 
     // Initialisation of gui
-    sudokuWin.init(volodia);
+    sudokuWin.init(easySudoku);
     sudokuWin.focus();
 
     buttonsWin.init();
     buttonsWin.setButtonCallback("solve", &onSolveButtonClick);
     buttonsWin.setButtonCallback("clear", &onClearButtonClick);
+    buttonsWin.setButtonCallback("exit", &onExitButtonClick);
+
+    statsWin.init();
 
     applicationLoop();
 
@@ -71,6 +78,8 @@ void applicationLoop() {
             windows[focusedWin]->onKey(ch);
         }
 
+        if (shouldExit) break;
+
         move(13, 0);
         clrtoeol();
         printw("You pressed '%c' (code %d)", ch, ch);
@@ -81,8 +90,13 @@ void applicationLoop() {
 void onSolveButtonClick() {
     SudokuResult result { solver.solve(sudokuWin.getDisplayedSudoku()) };
     sudokuWin.setDisplayedSudoku(result.sudoku);
+    statsWin.displayStats(result);
 }
 
 void onClearButtonClick() {
     sudokuWin.setDisplayedSudoku(Sudoku{});
+}
+
+void onExitButtonClick() {
+    shouldExit = true;
 }

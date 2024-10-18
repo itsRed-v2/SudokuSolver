@@ -5,13 +5,15 @@
 #include "windows/buttonsWin.hpp"
 
 void ButtonsWin::init() {
-    m_win = newwin(3, 21, 0, 25);
+    int height = 3, width = 28, startY = 0, startX = 25;
+    m_win = newwin(height, width, startY, startX);
     box(m_win, 0, 0);
     mvwprintw(m_win, 0, 2, "Menu");
 
     m_buttons = {
         Button{ "solve", "Solve !", 1, 3, CP_GREEN, NULL },
-        Button{ "clear", "Clear", 1, 13, CP_RED, NULL }
+        Button{ "clear", "Clear", 1, 13, CP_RED, NULL },
+        Button{ "exit", "Exit", 1, 21, CP_BLUE, NULL }
     };
 
     for (const Button &bt : m_buttons) {
@@ -26,7 +28,7 @@ void ButtonsWin::init() {
 void ButtonsWin::onKey(int code) {
     if (code == KEY_LEFT && m_selectedButton > 0) {
         m_selectedButton--;
-    } else if (code == KEY_RIGHT && m_selectedButton < 1) {
+    } else if (code == KEY_RIGHT && m_selectedButton < m_buttons.size() - 1) {
         m_selectedButton++;
     } else if (code == '\n') {
         if (m_buttons[m_selectedButton].callback) {
