@@ -5,6 +5,8 @@
 void InfoWin::init() {
     int height = 10, width = 28, startY = 3, startX = 25;
     m_win = newwin(height, width, startY, startX);
+    wbkgd(m_win, COLOR_PAIR(CP_NORMAL)); // Setting background color
+    wrefresh(m_win);
 }
 
 void InfoWin::clear() {

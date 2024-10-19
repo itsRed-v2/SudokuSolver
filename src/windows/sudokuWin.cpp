@@ -19,6 +19,7 @@ bool isKeyPress(int code) {
 
 void SudokuWin::init(const Sudoku &sudoku) {
     m_win = newwin(13, 25, 0, 0);
+    wbkgd(m_win, COLOR_PAIR(CP_NORMAL)); // Setting background color
     drawBorders(); // Drawing sudoku borders
     updateHighlightedCell(); // Highlight top left cell
     displayedSudoku = sudoku; // Initialize sudoku with default sudoku

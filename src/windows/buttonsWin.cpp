@@ -7,6 +7,7 @@
 void ButtonsWin::init() {
     int height = 3, width = 28, startY = 0, startX = 25;
     m_win = newwin(height, width, startY, startX);
+    wbkgd(m_win, COLOR_PAIR(CP_NORMAL)); // Setting background color
     box(m_win, 0, 0);
     mvwprintw(m_win, 0, 2, "Menu");
 
