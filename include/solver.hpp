@@ -4,6 +4,8 @@
 #include <array>
 #include <vector>
 #include <chrono>
+#include <string>
+#include <unordered_map>
 
 #include "sudoku.hpp"
 
@@ -61,19 +63,29 @@ public:
     friend bool operator==(const StateGrid &lhs, const StateGrid &rhs);
 };
 
-struct SudokuResult {
+struct SolveInfo {
     Sudoku sudoku;
-    bool isSolved;
-    int64_t calculationTimeMicrosec;
+    bool isSolved = false;
+    int64_t calculationTimeMicrosec = -1;
+    unsigned int deadEndsFound = 0;
+    unsigned int recursiveCalls = 0;
+    unsigned int currentRecursionDepth = 0;
 };
 
 class SudokuSolver {
+private:
+    unordered_map<string, void(*)(const SolveInfo &curData)> m_callbacks;
+public:
+    bool runCallbacks = false;
+
 public:
     SudokuSolver() = default;
-    SudokuResult solve(const Sudoku &grid);
+    SolveInfo solve(const Sudoku &grid);
+    void setCallback(const string &key, void(*cb)(const SolveInfo &curData));
 
 private:
-    void solveRecursive(StateGrid &states);
+    void solveRecursive(StateGrid &states, SolveInfo &data);
+    void runCallBack(const string &key, const SolveInfo &curData);
 };
 
 #endif

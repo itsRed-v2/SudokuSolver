@@ -17,14 +17,15 @@ bool isKeyPress(int code) {
     return code == KEY_LEFT || code == KEY_RIGHT || code == KEY_UP || code == KEY_DOWN;
 }
 
-void SudokuWin::init(const Sudoku &sudoku) {
-    m_win = newwin(13, 25, 0, 0);
+void SudokuWin::init(int y, int x, const Sudoku &sudoku, string title) {
+    m_title = title;
+    m_win = newwin(13, 25, y, x);
     wbkgd(m_win, COLOR_PAIR(CP_NORMAL)); // Setting background color
     drawBorders(); // Drawing sudoku borders
     updateHighlightedCell(); // Highlight top left cell
     displayedSudoku = sudoku; // Initialize sudoku with default sudoku
     drawSudoku(); // Draw sudoku content
-    mvwprintw(m_win, 0, 2, "Sudoku");
+    mvwaddstr(m_win, 0, 2, m_title.c_str());
     wrefresh(m_win); // Print to screen the window buffer
 }
 
@@ -98,7 +99,7 @@ void SudokuWin::drawSudoku() {
 
 void SudokuWin::focus() {
     // args: mvwchgat(window, start y, start x, nb of chars to change, attribute, color, NULL);
-    mvwchgat(m_win, 0, 2, 6, A_BOLD, CP_BLUE, NULL);
+    mvwchgat(m_win, 0, 2, m_title.length(), A_BOLD, CP_BLUE, NULL);
     m_showCurCell = true;
     updateHighlightedCell();
     wrefresh(m_win);
@@ -106,7 +107,7 @@ void SudokuWin::focus() {
 
 void SudokuWin::blur() {
     // args: mvwchgat(window, start y, start x, nb of chars to change, attribute, color, NULL);
-    mvwchgat(m_win, 0, 2, 6, A_NORMAL, CP_NORMAL, NULL);
+    mvwchgat(m_win, 0, 2, m_title.length(), A_NORMAL, CP_NORMAL, NULL);
     m_showCurCell = false;
     updateHighlightedCell();
     wrefresh(m_win);

@@ -10,10 +10,11 @@ private:
 
 public:
     explicit InfoWin() = default;
-    void init();
+    void init(int y, int x);
     void clear();
-    void displayStats(const SudokuResult &result);
-    void sayImpossibleSudoku(const SudokuResult &result);
+    void displayStats(const SolveInfo &result);
+    void displayIntermediate(const SolveInfo &result);
+    void sayImpossibleSudoku(const SolveInfo &result);
 };
 
 #endif

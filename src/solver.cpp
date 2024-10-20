@@ -246,28 +246,47 @@ bool operator==(const StateGrid &lhs, const StateGrid &rhs) {
 
 // class SudokuSolver
 
-SudokuResult SudokuSolver::solve(const Sudoku &grid) {
+void SudokuSolver::setCallback(const string &key, void(*cb)(const SolveInfo &curData)) {
+    m_callbacks.insert({ key, cb });
+}
+
+void SudokuSolver::runCallBack(const string &key, const SolveInfo &curData) {
+    if (!runCallbacks) return;
+    auto cb { m_callbacks[key] };
+    if (cb) cb(curData);
+}
+
+SolveInfo SudokuSolver::solve(const Sudoku &grid) {
+    SolveInfo data;
+
     using namespace std::chrono;
 
     auto start = high_resolution_clock::now();
 
     StateGrid states (grid);
-    solveRecursive(states);
+    solveRecursive(states, data);
 
     auto stop = high_resolution_clock::now();
     auto duration = duration_cast<microseconds>(stop - start);
 
-    return {
-        states.toSudoku(),
-        states.isSolved(),
-        duration.count()
-    };
+    data.sudoku = states.toSudoku();
+    data.isSolved = states.isSolved();
+    data.calculationTimeMicrosec = duration.count();
+    return data;
 }
 
-void SudokuSolver::solveRecursive(StateGrid &states) {
+void SudokuSolver::solveRecursive(StateGrid &states, SolveInfo &data) {
+    data.recursiveCalls++;
+    
     states.collapseFully();
+    data.sudoku = states.toSudoku();
+    runCallBack("after_collapse", data);
 
-    if (states.isSolved() || states.isImpossible()) {
+    if (states.isImpossible()) {
+        data.deadEndsFound++;
+        return;
+    }
+    if (states.isSolved()) {
         return;
     }
 
@@ -278,7 +297,9 @@ void SudokuSolver::solveRecursive(StateGrid &states) {
 
         StateGrid statesCopy { states };
         statesCopy.getFewestStateCell().collapseTo(s);
-        solveRecursive(statesCopy);
+        data.currentRecursionDepth++;
+        solveRecursive(statesCopy, data);
+        data.currentRecursionDepth--;
 
         if (statesCopy.isSolved()) {
             states = statesCopy;

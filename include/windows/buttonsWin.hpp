@@ -3,7 +3,7 @@
 
 #include <ncurses.h>
 #include <string>
-#include <functional>
+#include <algorithm>
 
 #include "interactiveWin.hpp"
 
@@ -14,8 +14,6 @@ using namespace std;
 struct Button {
     string id;
     string text;
-    int y;
-    int x;
     int colorPair;
     void(*callback)();
 };
@@ -24,14 +22,18 @@ class ButtonsWin: public InteractiveWin {
 private:
     WINDOW *m_win;
     int m_selectedButton { 0 };
-    array<Button, 3> m_buttons;
+    array<Button, 4> m_buttons;
+    bool m_focused = false;
 
 private:
     void updateHighlightedButton();
+    void redraw();
+    int getButtonOffset(int buttonIndex);
 
 public:
-    void init();
-    void setButtonCallback(const string &buttonId, void(*cb)());
+    void init(int y, int x);
+    void setButtonCallback(const string &id, void(*cb)());
+    void setButtonText(const string &id, string text);
 
     void onKey(int code);
     void focus();
